@@ -1,0 +1,3 @@
+Honor ``ensure_exists`` for the user media directories on Unix and macOS, so reading
+:func:`~platformdirs.user_documents_dir` and its siblings creates the directory and its parents the way the app-scoped
+directories already did - by :user:`ekanshul`.

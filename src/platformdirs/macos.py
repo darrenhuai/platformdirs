@@ -108,50 +108,55 @@ class _MacOSDefaults(PlatformDirsABC):  # ruff:ignore[too-many-public-methods]
         """Log directory shared by users, e.g. ``/Library/Logs/$appname/$version``."""
         return self._append_app_name_and_version("/Library/Logs")
 
+    def _user_media_dir(self, tilde_path: str) -> str:
+        path = os.path.expanduser(tilde_path)  # ruff:ignore[os-path-expanduser]
+        self._optionally_create_directory(path)
+        return path
+
     @property
     def user_documents_dir(self) -> str:
         """Documents directory tied to the user, e.g. ``~/Documents``."""
-        return os.path.expanduser("~/Documents")  # ruff:ignore[os-path-expanduser]
+        return self._user_media_dir("~/Documents")
 
     @property
     def user_downloads_dir(self) -> str:
         """Downloads directory tied to the user, e.g. ``~/Downloads``."""
-        return os.path.expanduser("~/Downloads")  # ruff:ignore[os-path-expanduser]
+        return self._user_media_dir("~/Downloads")
 
     @property
     def user_pictures_dir(self) -> str:
         """Pictures directory tied to the user, e.g. ``~/Pictures``."""
-        return os.path.expanduser("~/Pictures")  # ruff:ignore[os-path-expanduser]
+        return self._user_media_dir("~/Pictures")
 
     @property
     def user_videos_dir(self) -> str:
         """Videos directory tied to the user, e.g. ``~/Movies``."""
-        return os.path.expanduser("~/Movies")  # ruff:ignore[os-path-expanduser]
+        return self._user_media_dir("~/Movies")
 
     @property
     def user_music_dir(self) -> str:
         """Music directory tied to the user, e.g. ``~/Music``."""
-        return os.path.expanduser("~/Music")  # ruff:ignore[os-path-expanduser]
+        return self._user_media_dir("~/Music")
 
     @property
     def user_desktop_dir(self) -> str:
         """Desktop directory tied to the user, e.g. ``~/Desktop``."""
-        return os.path.expanduser("~/Desktop")  # ruff:ignore[os-path-expanduser]
+        return self._user_media_dir("~/Desktop")
 
     @property
     def user_projects_dir(self) -> str:
         """Projects directory tied to the user, e.g. ``~/Projects``."""
-        return os.path.expanduser("~/Projects")  # ruff:ignore[os-path-expanduser]
+        return self._user_media_dir("~/Projects")
 
     @property
     def user_publicshare_dir(self) -> str:
         """Public share directory tied to the user, e.g. ``~/Public``."""
-        return os.path.expanduser("~/Public")  # ruff:ignore[os-path-expanduser]  # API returns str, not Path
+        return self._user_media_dir("~/Public")
 
     @property
     def user_templates_dir(self) -> str:
         """Templates directory tied to the user, e.g. ``~/Templates``."""
-        return os.path.expanduser("~/Templates")  # ruff:ignore[os-path-expanduser]  # API returns str, not Path
+        return self._user_media_dir("~/Templates")
 
     @property
     def user_fonts_dir(self) -> str:

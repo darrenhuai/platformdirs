@@ -654,13 +654,6 @@ def test_user_dirs_respects_xdg_config_home(posix_tmp_path: str, monkeypatch: py
     assert Unix().user_documents_path == Path(posix_tmp_path) / "CustomDocs"
 
 
-@pytest.fixture
-def posix_tmp_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> str:
-    # Unix paths in Windows tests need the temporary directory's drive as the current drive.
-    monkeypatch.chdir(tmp_path)
-    return tmp_path.as_posix().removeprefix(tmp_path.drive)
-
-
 def test_user_dirs_ignores_relative_xdg_config_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("XDG_DOCUMENTS_DIR", raising=False)
     monkeypatch.chdir(tmp_path)

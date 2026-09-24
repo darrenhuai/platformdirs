@@ -268,11 +268,64 @@ def test_macos_xdg_media_dirs(monkeypatch: pytest.MonkeyPatch, env_var: str, pro
     assert getattr(MacOS(), prop) == "/custom/media"
 
 
-def test_macos_ensure_exists_creates_xdg_media_dir(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    media = tmp_path / "parent" / "Documents"
-    monkeypatch.setenv("XDG_DOCUMENTS_DIR", media.as_posix())
-    assert MacOS(ensure_exists=True).user_documents_path == media
+@pytest.mark.parametrize(
+    ("env_var", "prop"),
+    [
+        pytest.param("XDG_DOCUMENTS_DIR", "user_documents_path", id="user_documents_path"),
+        pytest.param("XDG_DOWNLOAD_DIR", "user_downloads_path", id="user_downloads_path"),
+        pytest.param("XDG_PICTURES_DIR", "user_pictures_path", id="user_pictures_path"),
+        pytest.param("XDG_VIDEOS_DIR", "user_videos_path", id="user_videos_path"),
+        pytest.param("XDG_MUSIC_DIR", "user_music_path", id="user_music_path"),
+        pytest.param("XDG_DESKTOP_DIR", "user_desktop_path", id="user_desktop_path"),
+        pytest.param("XDG_PROJECTS_DIR", "user_projects_path", id="user_projects_path"),
+        pytest.param("XDG_PUBLICSHARE_DIR", "user_publicshare_path", id="user_publicshare_path"),
+        pytest.param("XDG_TEMPLATES_DIR", "user_templates_path", id="user_templates_path"),
+    ],
+)
+def test_macos_ensure_exists_creates_xdg_media_dir(
+    monkeypatch: pytest.MonkeyPatch, posix_tmp_path: str, env_var: str, prop: str
+) -> None:
+    media = Path(posix_tmp_path) / "parent" / "Media"
+    monkeypatch.setenv(env_var, media.as_posix())
+    assert getattr(MacOS(ensure_exists=True), prop) == media
     assert media.is_dir()
+
+
+@pytest.mark.parametrize(
+    ("prop", "folder"),
+    [
+        pytest.param("user_documents_path", "Documents", id="user_documents_path"),
+        pytest.param("user_downloads_path", "Downloads", id="user_downloads_path"),
+        pytest.param("user_pictures_path", "Pictures", id="user_pictures_path"),
+        pytest.param("user_videos_path", "Movies", id="user_videos_path"),
+        pytest.param("user_music_path", "Music", id="user_music_path"),
+        pytest.param("user_desktop_path", "Desktop", id="user_desktop_path"),
+        pytest.param("user_projects_path", "Projects", id="user_projects_path"),
+        pytest.param("user_publicshare_path", "Public", id="user_publicshare_path"),
+        pytest.param("user_templates_path", "Templates", id="user_templates_path"),
+    ],
+)
+@pytest.mark.usefixtures("_clear_xdg_env")
+def test_macos_ensure_exists_creates_default_media_dir(
+    monkeypatch: pytest.MonkeyPatch, posix_tmp_path: str, prop: str, folder: str
+) -> None:
+    # No XDG variable set, so this goes through the macOS defaults rather than the mixin.
+    monkeypatch.setenv("HOME", posix_tmp_path)
+    monkeypatch.setenv("USERPROFILE", posix_tmp_path)
+    expected = Path(posix_tmp_path) / folder
+    assert getattr(MacOS(ensure_exists=True), prop) == expected
+    assert expected.is_dir()
+
+
+@pytest.mark.usefixtures("_clear_xdg_env")
+def test_macos_media_dir_not_created_without_ensure_exists(
+    monkeypatch: pytest.MonkeyPatch, posix_tmp_path: str
+) -> None:
+    monkeypatch.setenv("HOME", posix_tmp_path)
+    monkeypatch.setenv("USERPROFILE", posix_tmp_path)
+    expected = Path(posix_tmp_path) / "Documents"
+    assert MacOS().user_documents_path == expected
+    assert not expected.exists()
 
 
 @pytest.mark.parametrize(

@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING, cast
 import pytest
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from _pytest.fixtures import SubRequest
 
 PROPS = (
@@ -52,3 +54,11 @@ def func_path(request: SubRequest) -> str:
 @pytest.fixture
 def props() -> tuple[str, ...]:
     return PROPS
+
+
+@pytest.fixture
+def posix_tmp_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> str:
+    # Unix paths in Windows tests need the temporary directory's drive as the current drive. Dropping the drive also
+    # keeps the value absolute under posixpath, which is what the XDG variables are checked against.
+    monkeypatch.chdir(tmp_path)
+    return tmp_path.as_posix().removeprefix(tmp_path.drive)
